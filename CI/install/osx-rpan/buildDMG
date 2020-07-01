@@ -1,0 +1,1 @@
+dmgbuild -s ./settings.json "RPAN Studio" obs.dmg

@@ -1,0 +1,20 @@
+project(obs-ffmpeg-mux)
+
+find_package(FFmpeg REQUIRED
+	COMPONENTS avcodec avutil avformat)
+include_directories(${FFMPEG_INCLUDE_DIRS})
+
+set(obs-ffmpeg-mux_SOURCES
+	ffmpeg-mux.c)
+
+set(obs-ffmpeg-mux_HEADERS
+	ffmpeg-mux.h)
+
+add_executable(obs-ffmpeg-mux
+	${obs-ffmpeg-mux_SOURCES}
+	${obs-ffmpeg-mux_HEADERS})
+
+target_link_libraries(obs-ffmpeg-mux
+	${FFMPEG_LIBRARIES})
+
+install_obs_core(obs-ffmpeg-mux)

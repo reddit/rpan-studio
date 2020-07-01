@@ -1,0 +1,52 @@
+uniform float4x4 ViewProj;
+uniform texture2d image;
+
+uniform texture3d clut;
+uniform float clut_amount;
+uniform float clut_scale;
+uniform float clut_offset;
+
+sampler_state textureSampler {
+	Filter    = Linear;
+	AddressU  = Clamp;
+	AddressV  = Clamp;
+	AddressW  = Clamp;
+};
+
+struct VertDataIn {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+struct VertDataOut {
+	float4 pos : POSITION;
+	float2 uv  : TEXCOORD0;
+};
+
+VertDataOut VSDefault(VertDataIn v_in)
+{
+	VertDataOut vert_out;
+	vert_out.uv = v_in.uv;
+	vert_out.pos = mul(float4(v_in.pos.xyz, 1.0), ViewProj);
+	return vert_out;
+}
+
+float4 LUT(VertDataOut v_in) : TARGET
+{
+	float4 textureColor = image.Sample(textureSampler, v_in.uv);
+
+	float3 clut_uvw = textureColor.rgb * clut_scale + clut_offset;
+	float3 luttedColor = clut.Sample(textureSampler, clut_uvw).rgb;
+
+	float3 final_color = lerp(textureColor.rgb, luttedColor, clut_amount);
+	return float4(final_color.rgb, textureColor.a);
+}
+
+technique Draw
+{
+	pass
+	{
+		vertex_shader = VSDefault(v_in);
+		pixel_shader  = LUT(v_in);
+	}
+}
