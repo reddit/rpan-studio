@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=RPAN Studio
+Comment=OBS Studio with RPAN integration
+Path=/usr
+Exec=obs
+Icon=rpan-studio
+Categories=AudioVideo;Recorder;

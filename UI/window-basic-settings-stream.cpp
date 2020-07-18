@@ -11,6 +11,8 @@
 
 #ifdef BROWSER_AVAILABLE
 #include <browser-panel.hpp>
+#endif
+#if defined(BROWSER_AVAILABLE) || REDDIT_ENABLED
 #include "auth-oauth.hpp"
 #endif
 
@@ -543,7 +545,7 @@ void OBSBasicSettings::OnAuthConnected()
 
 void OBSBasicSettings::on_connectAccount_clicked()
 {
-#if defined(BROWSER_AVAILABLE) || defined(REDDIT_ENABLED)
+#if defined(BROWSER_AVAILABLE) || REDDIT_ENABLED
 	std::string service = QT_TO_UTF8(ui->service->currentText());
 
 	OAuth::DeleteCookies(service);

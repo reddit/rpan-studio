@@ -27,7 +27,7 @@ RedditStatsPanel::RedditStatsPanel(QWidget *parent)
 {
 	ui->setupUi(this);
 
-	connect(ui->streamUrlLabel, SIGNAL(clicked()), this,
+	connect(ui->copyStreamLinkBtn, SIGNAL(clicked()), this,
 	        SLOT(CopyURLToClipboard()));
 
 	timer.reset(new QTimer(this));
@@ -42,7 +42,8 @@ RedditStatsPanel::RedditStatsPanel(QWidget *parent)
 	ui->upvotesLabel->setText("");
 	ui->watchersLabel->setText("");
 	ui->timeleftLabel->setText("");
-	ui->streamUrlLabel->setText("");
+	ui->awardsLabel->setText("");
+	ui->copyStreamLinkBtn->setVisible(false);
 
 	obs_frontend_add_event_callback(on_frontend_event, this);
 
@@ -118,7 +119,9 @@ void RedditStatsPanel::CopyURLToClipboard()
 		QToolTip::showText(QCursor::pos(),
 		                   Str(
 			                   "Reddit.Panel.Stats.Tooltip.Link.Copied"),
-		                   this);
+		                   this,
+				   QRect(),
+				   2000);
 
 	}
 }
@@ -138,18 +141,25 @@ void RedditStatsPanel::OnLoadStream(const QString &text,
 
 	Json streamData = output["data"];
 	Json postData = streamData["post"];
-	url = postData["url"].string_value();
+	string newUrl = postData["url"].string_value();
+	if(url != newUrl) {
+		url = newUrl;
+		blog(LOG_INFO, "Reddit: Loaded stream stats for URL: %s", url.c_str());
+	}
 	int score = postData["score"].int_value();
 	int watchers = streamData["continuous_watchers"].int_value();
 	timeRemaining = static_cast<int>(streamData["estimated_remaining_time"]
 		.number_value());
+	vector<Json> awards = postData["awardings"].array_items();
+	int totalAwards = 0;
+	for(auto it = awards.begin(); it != awards.end(); ++it) {
+		totalAwards += (*it)["total"].int_value();
+	}
 
 	ui->upvotesLabel->setText(QString::number(score));
 	ui->watchersLabel->setText(QString::number(watchers));
-
-	QString streamUrl = QString("<a href='#'>%1</a>")
-		.arg(Str("Reddit.Panel.Stats.Label.Link"));
-	ui->streamUrlLabel->setText(streamUrl);
+	ui->awardsLabel->setText(QString::number(totalAwards));
+	ui->copyStreamLinkBtn->setVisible(true);
 }
 
 namespace {

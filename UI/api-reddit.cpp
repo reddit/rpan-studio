@@ -101,7 +101,7 @@ vector<string> LoginHeaders(const std::string &postData,
 	                          REDDIT_HMAC_TOKEN_VERSION + ":"
 	                          + nowStr + ":";
 
-	memset(hmacSecret.data(), 0, hmacSecret.length());
+	memset((void *)hmacSecret.data(), 0, hmacSecret.length());
 
 	headers.emplace_back("Client-Vendor-ID: " + string(REDDIT_VENDOR_ID));
 	headers.emplace_back("X-hmac-signed-body: " +

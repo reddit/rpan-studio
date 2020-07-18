@@ -43,6 +43,8 @@
     <file>images/reddit-login-sidebar.png</file>
     <file>images/reddit.png</file>
     <file>images/start-stream-sidebar-3.png</file>
+    <file>images/ok.png</file>
+    <file>images/invalid.png</file>
   </qresource>
   <qresource prefix="/settings">
     <file>images/settings/output.svg</file>

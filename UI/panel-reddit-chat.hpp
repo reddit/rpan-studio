@@ -27,6 +27,7 @@ private:
 
 	QString GetAvatar(const std::string &avatarId);
 	QString GetImage(const QString &imageUrl);
+	void ParseCommand(const QString &comment);
 
 	QWebSocket websocket;
 	QScopedPointer<QThread> apiThread;
@@ -34,12 +35,15 @@ private:
 	QScopedPointer<QThread> postCommentThread;
 
 	std::string websocketUrl;
+	std::string postId;
+	bool connected = false;
 
 	QTextTableFormat tableFormat;
 	ImageDownloader *imageDownloader;
 
 private slots:
 	void WebsocketConnected();
+	void WebsocketDisconnected();
 	void WebsocketSSLError(const QList<QSslError> &errors);
 	void WebsocketError(QAbstractSocket::SocketError error);
 	void MessageReceived(QString message);

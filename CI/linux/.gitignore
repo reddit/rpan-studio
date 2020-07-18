@@ -1,0 +1,6 @@
+AppDir/*
+!AppDir/.keep
+build/*
+!build/.keep
+tmp/*
+!tmp/.keep

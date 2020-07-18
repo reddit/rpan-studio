@@ -1,0 +1,20 @@
+version: '3'
+services:
+    builder:
+        build: .
+        volumes:
+            - '../..:/project/src'
+            - './scripts:/project/scripts'
+            - './build:/project/build'
+            - './AppDir:/project/AppDir'
+            - './tmp:/project/tmp'
+        environment:
+            - REDDIT_HASH=${REDDIT_HASH}
+            - REDDIT_CLIENTID=${REDDIT_CLIENTID}
+            - REDDIT_SECRET=${REDDIT_SECRET}
+            - REDDIT_HMAC_GLOBAL_VERSION=${REDDIT_HMAC_GLOBAL_VERSION}
+            - REDDIT_HMAC_PLATFORM=${REDDIT_HMAC_PLATFORM}
+            - REDDIT_HMAC_TOKEN_VERSION=${REDDIT_HMAC_TOKEN_VERSION}
+            - BUILD_THREADS=${BUILD_THREADS}
+            - CLEAN_BUILD=${CLEAN_BUILD}
+        command: /project/scripts/build.sh

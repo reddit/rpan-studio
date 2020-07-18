@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package>
+    <Name>com.reddit.rpanstudio</Name>
+    <DisplayName>RPAN Studio</DisplayName>
+    <Description>RPAN Studio Application</Description>
+    <Version>25.0.7.6</Version>
+    <ReleaseDate>2020-07-01</ReleaseDate>
+    <ForcedInstallation>true</ForcedInstallation>
+    <Script>installscript.qs</Script>
+</Package>

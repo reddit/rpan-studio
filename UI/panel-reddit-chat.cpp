@@ -15,6 +15,7 @@
 
 #define PAGE_CHAT 0
 #define PAGE_OFFLINE 1
+#define PAGE_CONNECTING 2
 
 using namespace std;
 using namespace json11;
@@ -39,12 +40,16 @@ RedditChatPanel::RedditChatPanel(QWidget *parent)
 {
 	ui->setupUi(this);
 
+	ui->disconnectedWarningLbl->setProperty("themeID", "error");
+
 	connect(ui->sendButton, SIGNAL(clicked()), this, SLOT(PostComment()));
 	connect(ui->chatInputEdit, SIGNAL(returnPressed()), this,
 	        SLOT(PostComment()));
 
 	connect(&websocket, &QWebSocket::connected, this,
 	        &RedditChatPanel::WebsocketConnected);
+	connect(&websocket, &QWebSocket::disconnected, this,
+	        &RedditChatPanel::WebsocketDisconnected);
 	connect(&websocket,
 	        QOverload<const QList<QSslError> &>::of(&QWebSocket::sslErrors),
 	        this, &RedditChatPanel::WebsocketSSLError);
@@ -52,7 +57,7 @@ RedditChatPanel::RedditChatPanel(QWidget *parent)
 	        QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
 	        this, &RedditChatPanel::WebsocketError);
 	connect(&websocket, &QWebSocket::textMessageReceived, this,
-		&RedditChatPanel::MessageReceived);
+	        &RedditChatPanel::MessageReceived);
 
 	imageDownloader = new ImageDownloader(ui->chatOutput->document(), this);
 
@@ -94,6 +99,29 @@ void RedditChatPanel::SetPage(int page)
 
 	switch (page) {
 	case PAGE_CHAT: {
+		ui->chatOutput->setEnabled(true);
+		ui->chatInputEdit->setEnabled(true);
+		ui->sendButton->setEnabled(true);
+		break;
+	}
+	case PAGE_OFFLINE:
+		connected = false;
+		websocket.close();
+		imageDownloader->Reset();
+		break;
+	case PAGE_CONNECTING:
+		ui->chatOutput->clear();
+		imageDownloader->Reset();
+		ui->chatOutput->setEnabled(false);
+		ui->chatInputEdit->setEnabled(false);
+		ui->sendButton->setEnabled(false);
+		ui->connectingLabel->setText(
+			connected ? QTStr("Reddit.Panel.Chat.Reconnecting")
+				: QTStr("Reddit.Panel.Chat.Connecting"));
+		ui->disconnectedWarningLbl->setText(
+			connected ? QTStr("Reddit.Panel.Chat.Disconnected")
+				: "");
+
 		auto *main = OBSBasic::Get();
 		auto *broadcastId = config_get_string(main->Config(), "Reddit",
 		                                      "BroadcastId");
@@ -103,15 +131,6 @@ void RedditChatPanel::SetPage(int page)
 		        &RedditChatPanel::OnLoadStream);
 		apiThread.reset(thread);
 		apiThread->start();
-		break;
-	}
-	case PAGE_OFFLINE:
-		websocket.close();
-		ui->chatOutput->clear();
-		ui->chatOutput->setEnabled(false);
-		ui->chatInputEdit->setEnabled(false);
-		ui->sendButton->setEnabled(false);
-		imageDownloader->Reset();
 		break;
 	}
 }
@@ -225,9 +244,18 @@ void RedditChatPanel::ParseComment(const string &author,
 
 void RedditChatPanel::WebsocketConnected()
 {
-	ui->chatOutput->setEnabled(true);
-	ui->chatInputEdit->setEnabled(true);
-	ui->sendButton->setEnabled(true);
+	blog(LOG_INFO, "Reddit: Connected to chat");
+	SetPage(PAGE_CHAT);
+	connected = true;
+}
+
+void RedditChatPanel::WebsocketDisconnected()
+{
+	if (ui->stackedWidget->currentIndex() == PAGE_CHAT) {
+		blog(LOG_INFO,
+		     "Reddit: Lost connection to chat. Reconnecting...");
+		SetPage(PAGE_CONNECTING);
+	}
 }
 
 void RedditChatPanel::WebsocketSSLError(const QList<QSslError> &)
@@ -284,10 +312,16 @@ void RedditChatPanel::PostComment()
 	                                       "Reddit",
 	                                       "BroadcastId");
 
-	string comment = ui->chatInputEdit->text().trimmed().toStdString();
+	QString comment = ui->chatInputEdit->text().trimmed();
 	ui->chatInputEdit->clear();
 
-	auto *thread = RedditApi::PostComment(broadcastId, comment);
+	if (comment.startsWith("/")) {
+		ParseCommand(comment);
+		return;
+	}
+
+	auto *thread = RedditApi::PostComment(broadcastId,
+	                                      comment.toStdString());
 	connect(thread, &RemoteTextThread::Result, this,
 	        &RedditChatPanel::PostCommentDone);
 	postCommentThread.reset(thread);
@@ -372,15 +406,15 @@ void RedditChatPanel::OnLoadStream(const QString &text,
 	Json streamData = output["data"];
 	Json postData = streamData["post"];
 
-	string postId = postData["id"].string_value();
+	postId = postData["id"].string_value();
+	websocketUrl = postData["liveCommentsWebsocket"]
+		.string_value();
+
 	auto *thread = RedditApi::FetchPostComments(postId);
 	connect(thread, &RemoteTextThread::Result, this,
 	        &RedditChatPanel::PopulateComments);
 	fetchCommentsThread.reset(thread);
 	fetchCommentsThread->start();
-
-	websocketUrl = postData["liveCommentsWebsocket"]
-		.string_value();
 }
 
 QString RedditChatPanel::GetAvatar(const string &authorId)
@@ -402,6 +436,19 @@ QString RedditChatPanel::GetImage(const QString &url)
 	return QString("img://%1").arg(imageDownloader->Download(url));
 }
 
+void RedditChatPanel::ParseCommand(const QString &comment)
+{
+	if (comment.mid(1).startsWith("disconnect")) {
+		websocket.close();
+	} else {
+		QTextCursor cursor(ui->chatOutput->textCursor());
+		cursor.movePosition(QTextCursor::End);
+		QTextTable *table = cursor.insertTable(1, 1, tableFormat);
+		table->cellAt(0, 0).firstCursorPosition().insertHtml(
+			QString("<i>Invalid command: %1</i>").arg(comment));
+	}
+}
+
 namespace {
 
 void on_frontend_event(enum obs_frontend_event event, void *param)
@@ -410,7 +457,7 @@ void on_frontend_event(enum obs_frontend_event event, void *param)
 
 	switch (event) {
 	case OBS_FRONTEND_EVENT_STREAMING_STARTED:
-		panel->SetPage(PAGE_CHAT);
+		panel->SetPage(PAGE_CONNECTING);
 		break;
 	case OBS_FRONTEND_EVENT_STREAMING_STOPPED:
 		panel->SetPage(PAGE_OFFLINE);

@@ -26,7 +26,7 @@ string RedditAuth::userAgent;
 
 std::shared_ptr<RedditAuth> RedditAuth::Login(QWidget *parent)
 {
-	auto dlg = RedditLoginDialog2(parent);
+	RedditLoginDialog2 dlg(parent);
 	int result = dlg.exec();
 
 	if (!result) {
@@ -142,6 +142,4 @@ void RegisterRedditAuth()
 	                     CreateRedditAuth,
 	                     RedditAuth::Login,
 	                     DeleteCookies);
-
-	blog(LOG_WARNING, "REDDIT AUTH");
 }

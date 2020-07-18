@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Installer>
+    <Name>RPAN Studio</Name>
+    <Version>25.0.7.6</Version>
+    <Title>RPAN Studio Installer</Title>
+    <Publisher>Reddit, Inc.</Publisher>
+    <ProductUrl>https://www.reddit.com/r/RPANStudio</ProductUrl>
+    <StartMenuDir>RPAN Studio</StartMenuDir>
+    <TargetDir>@ApplicationsDirX64@/RPAN Studio</TargetDir>
+    <MaintenanceToolName>uninstall</MaintenanceToolName>
+    <MaintenanceToolIniFile>uninstall</MaintenanceToolIniFile>
+    <RepositorySettingsPageVisible>false</RepositorySettingsPageVisible>
+    <SupportsModify>false</SupportsModify>
+    <!-- Doesn't support setting the working directory... -->
+    <!-- <RunProgram>@TargetDir@/bin/64bit/obs64.exe</RunProgram> -->
+    <!-- <RunProgramDescription>Launch RPAN Studio</RunProgramDescription> -->
+    <InstallerApplicationIcon>rpan-studio</InstallerApplicationIcon>
+    <InstallerWindowIcon>rpan-studio.png</InstallerWindowIcon>
+    <Logo>rpan-studio.png</Logo>
+    <WizardStyle>Modern</WizardStyle>
+</Installer>

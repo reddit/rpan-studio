@@ -4,6 +4,10 @@
 
 #include "ui_RedditStartStreamDialog2.h"
 
+namespace json11 {
+class Json;
+}
+
 class RedditStartStreamDialog2 : public QDialog {
 Q_OBJECT
 
@@ -16,6 +20,9 @@ public:
 
 private:
 	void SetPage(int page);
+	void UpdateEncoderSettings();
+	json11::Json LoadEncoderSettings();
+	void SaveStreamSettings();
 
 	void LoadSubreddits();
 	void LoadDynamicConfig();
@@ -25,9 +32,17 @@ private:
 	QScopedPointer<QThread> loadDynamicConfigThread;
 
 	bool retried = false;
+	bool fixAudioTracks = false;
+	bool fixVideoTracks = false;
+	int maxAudioBitrate = 2048;
+	int maxVideoBitrate = 128;
+	int maxKeyframeInterval = 2;
+	int currentAudioBitrate = 0;
+	int currentVideoBitrate = 0;
 
 private slots:
 	void CreateStream();
+	void ValidateConfig();
 
 	void OnLoadSubreddits(const QString &text, const QString &error,
 	                      const QStringList &responseHeaders);

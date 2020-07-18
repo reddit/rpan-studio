@@ -103,6 +103,10 @@ template<typename OBSRef> struct SignalContainer {
 	OBSRef ref;
 	vector<shared_ptr<OBSSignal>> handlers;
 };
+
+#if REDDIT_ENABLED
+void RedditRestoreRPANResolution();
+#endif
 }
 
 extern volatile long insideEventLoop;
@@ -416,6 +420,12 @@ OBSBasic::OBSBasic(QWidget *parent)
 		this,
 		SLOT(ScenesReordered(const QModelIndex &, int, int,
 				     const QModelIndex &, int)));
+
+#if REDDIT_ENABLED
+	auto *action = ui->menuTools->addAction(
+		QTStr("Reddit.Tools.DefaultResolution"));
+	connect(action, &QAction::triggered, RedditRestoreRPANResolution);
+#endif
 }
 
 static void SaveAudioDevice(const char *name, int channel, obs_data_t *parent,
@@ -6013,7 +6023,7 @@ void OBSBasic::on_streamButton_clicked()
 #if REDDIT_ENABLED
 		if (strncmp(serviceName, "Reddit", 6) == 0) {
 			isReddit = true;
-			auto dlg = RedditStartStreamDialog2();
+			RedditStartStreamDialog2 dlg(this);
 			if (!dlg.exec()) {
 				return;
 			}
@@ -8004,5 +8014,24 @@ void OBSBasic::RedditCheckStreamStatus(const QString &output, const QString &err
 		string reason = streamData["ended_reason"].string_value();
 		OBSMessageBox::information(this, Str("Reddit.EndStream.Title"), reason.c_str());
 	}
+}
+
+namespace {
+void RedditRestoreRPANResolution()
+{
+	auto *main = OBSBasic::Get();
+	if (main->StreamingActive()) {
+		return;
+	}
+
+	auto *config = main->Config();
+	config_set_int(config, "Video", "BaseCX", 480);
+	config_set_int(config, "Video", "BaseCY", 854);
+	config_set_int(config, "Video", "OutputCX", 480);
+	config_set_int(config, "Video", "OutputCY", 854);
+	main->ResetVideo();
+	main->ResetOutputs();
+	config_save_safe(config, "tmp", nullptr);
+}
 }
 #endif

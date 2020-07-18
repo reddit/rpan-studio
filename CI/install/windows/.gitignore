@@ -1,0 +1,4 @@
+packages/**/data/**
+!packages/**/data/.keepme
+!config/*.xml
+!packages/**/meta/*.xml

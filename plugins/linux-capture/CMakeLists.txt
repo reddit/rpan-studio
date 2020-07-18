@@ -9,6 +9,11 @@ endif()
 find_package(XCB COMPONENTS XCB RANDR SHM XFIXES XINERAMA REQUIRED)
 find_package(X11_XCB REQUIRED)
 
+if("${PKG_XCB_xcb_VERSION}" VERSION_LESS "1.12")
+    message(STATUS "libXCB too old.  Version 1.12 or greater required")
+    return()
+endif()
+
 include_directories(SYSTEM
 	"${CMAKE_SOURCE_DIR}/libobs"
 	${X11_Xcomposite_INCLUDE_PATH}

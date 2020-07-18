@@ -15,6 +15,7 @@ using namespace json11;
 #define PAGE_CONFIG 0
 #define PAGE_WAITING 1
 #define PAGE_FAILURE 2
+#define PAGE_INVALID_SETTINGS 3
 
 namespace {
 const char *CONF_SECTION = "Reddit";
@@ -37,15 +38,15 @@ RedditStartStreamDialog2::RedditStartStreamDialog2(QWidget *parent)
 	connect(ui->titleEdit, SIGNAL(textChanged(const QString&)), this,
 	        SLOT(UpdateButtons()));
 	connect(ui->titleEdit, SIGNAL(returnPressed()), this,
-	        SLOT(CreateStream()));
+	        SLOT(ValidateConfig()));
 	connect(ui->subredditCombo, SIGNAL(currentTextChanged(const QString &)),
 	        this, SLOT(UpdateButtons()));
 	connect(ui->subredditCombo, SIGNAL(editTextChanged(const QString &)),
 	        this, SLOT(UpdateButtons()));
 	connect(ui->subredditCombo->lineEdit(), SIGNAL(returnPressed()), this,
-	        SLOT(CreateStream()));
+	        SLOT(ValidateConfig()));
 	connect(ui->startButton, SIGNAL(clicked()), this,
-	        SLOT(CreateStream()));
+	        SLOT(ValidateConfig()));
 
 	LoadSubreddits();
 }
@@ -82,18 +83,8 @@ void RedditStartStreamDialog2::LoadSubreddits()
 
 void RedditStartStreamDialog2::CreateStream()
 {
-	if (!ui->startButton->isEnabled()) {
-		return;
-	}
-
 	QString title = ui->titleEdit->text().trimmed();
 	QString subreddit = ui->subredditCombo->currentText().trimmed();
-
-	auto *main = OBSBasic::Get();
-	config_set_string(main->Config(), CONF_SECTION, CONF_STREAM_TITLE,
-	                  title.toStdString().c_str());
-	config_set_string(main->Config(), CONF_SECTION, CONF_LAST_SUBREDDIT,
-	                  subreddit.toStdString().c_str());
 
 	title = QUrl::toPercentEncoding(title);
 	auto *thread = RedditApi::CreateStream(title.toStdString(),
@@ -107,8 +98,27 @@ void RedditStartStreamDialog2::CreateStream()
 	createStreamThread.reset(thread);
 	createStreamThread->start();
 
-	SetPage(PAGE_WAITING);
 	ui->subtitle->setText(Str("Reddit.StartStream.Starting.Message"));
+}
+
+void RedditStartStreamDialog2::ValidateConfig()
+{
+	if (ui->stackedWidget->currentIndex() == PAGE_INVALID_SETTINGS) {
+                ui->subtitle->setText(Str("Reddit.StartStream.Configuring"));
+		SetPage(PAGE_WAITING);
+		UpdateEncoderSettings();
+		return;
+	}
+
+        if (!ui->startButton->isEnabled()) {
+                return;
+        }
+
+	SaveStreamSettings();
+        LoadDynamicConfig();
+
+	SetPage(PAGE_WAITING);
+        ui->subtitle->setText(Str("Reddit.StartStream.Configuring"));
 }
 
 void RedditStartStreamDialog2::LoadDynamicConfig()
@@ -123,6 +133,7 @@ void RedditStartStreamDialog2::LoadDynamicConfig()
 void RedditStartStreamDialog2::SetPage(int page)
 {
 	ui->stackedWidget->setCurrentIndex(page);
+	ui->startButton->setText(Str("Reddit.StartStream.Button.StartStream"));
 
 	switch (page) {
 	case PAGE_CONFIG:
@@ -130,6 +141,34 @@ void RedditStartStreamDialog2::SetPage(int page)
 		ui->titleEdit->setFocus();
 		UpdateButtons();
 		break;
+	case PAGE_INVALID_SETTINGS: {
+		ui->startButton->setEnabled(true);
+
+		ui->subtitle->setText(Str("Reddit.StartStream.Configuring.Error.Title"));
+		ui->startButton->setText(
+			Str("Reddit.StartStream.Configuring.Button.Accept"));
+		QPixmap okIcon = QPixmap(QString::fromUtf8(":/res/images/ok.png"));
+		QPixmap invalidIcon = QPixmap(QString::fromUtf8(":/res/images/invalid.png"));
+                ui->invalidAudioIcon->setPixmap(fixAudioTracks ? invalidIcon : okIcon);
+		ui->invalidVideoIcon->setPixmap(fixVideoTracks ? invalidIcon : okIcon);
+
+		QString audioText = QTStr("Basic.Settings.Audio");
+		if (fixAudioTracks) {
+			audioText = audioText.append(": %1kbps -> %2kbps")
+					    .arg(currentAudioBitrate)
+					    .arg(maxAudioBitrate);
+		}
+                ui->invalidAudioLabel->setText(audioText);
+
+                QString videoText = QTStr("Basic.Settings.Video");
+		if (fixVideoTracks) {
+			videoText = videoText.append(": %1kbps -> %2kbps")
+					    .arg(currentVideoBitrate)
+					    .arg(maxVideoBitrate);
+		}
+		ui->invalidVideoLabel->setText(videoText);
+		break;
+	}
 	case PAGE_WAITING:
 		ui->startButton->setEnabled(false);
 		break;
@@ -255,8 +294,7 @@ void RedditStartStreamDialog2::OnCreateStream(const QString &text,
 	                  CONF_BROADCAST_ID,
 	                  broadcastId.c_str());
 
-	LoadDynamicConfig();
-	ui->subtitle->setText(Str("Reddit.StartStream.Configuring"));
+	accept();
 }
 
 void RedditStartStreamDialog2::OnDynamicConfig(const QString &text,
@@ -267,42 +305,134 @@ void RedditStartStreamDialog2::OnDynamicConfig(const QString &text,
 	string parseError;
 	Json json = Json::parse(result, parseError);
 
-	Json globalConfig = json["global"];
-	int fps = globalConfig["broadcast_fps"].number_value();
-	int videoBitrate =
-		globalConfig["broadcast_max_video_bitrate"].number_value();
-	int maxKeyframeInterval =
-		globalConfig["broadcast_max_keyframe_interval"].number_value();
-	int audioBitrate =
-		globalConfig["broadcast_max_audio_bitrate"].number_value();
+        maxVideoBitrate = 2048;
+	maxAudioBitrate = 128;
 
+	// Parse Dynamic Config
+	Json globalConfig = json["global"];
+	if (globalConfig.is_object()) {
+		Json maxVideoBitrateJson =
+			globalConfig["broadcast_studio_max_video_bitrate"];
+		Json maxAudioBitrateJson =
+			globalConfig["broadcast_max_audio_bitrate"];
+		Json maxKeyframeIntervalJson =
+			globalConfig["broadcast_max_keyframe_interval"];
+
+		if (maxVideoBitrateJson.is_number()) {
+			maxVideoBitrate = maxVideoBitrateJson.int_value();
+		}
+                if (maxAudioBitrateJson.is_number()) {
+                        maxAudioBitrate = maxAudioBitrateJson.int_value();
+                }
+		if (maxKeyframeIntervalJson.is_number()) {
+			maxKeyframeInterval = maxKeyframeIntervalJson.int_value();
+		}
+	}
+
+	// Check existing audio config
 	auto *main = OBSBasic::Get();
 	auto *config = main->Config();
-	config_set_string(config, "Output", "Mode", "Advanced");
-	config_set_default_int(config, "Video", "FPSType", 1);
-	config_set_int(config, "Video", "FPSInt", fps);
+
+	char trackBitrateBuf[] = "TrackXBitrate";
+
+	for (int i = 1; i <= 6; ++i) {
+		sprintf(trackBitrateBuf, "Track%dBitrate", i);
+		currentAudioBitrate = config_get_int(config, "AdvOut", trackBitrateBuf);
+		if (currentAudioBitrate > maxAudioBitrate) {
+			fixAudioTracks = true;
+			break;
+		}
+	}
+
+	// Check existing video config
+	Json currentEncoderConfigJson = LoadEncoderSettings();
+	if (currentEncoderConfigJson.is_object()) {
+		Json bitrateJson = currentEncoderConfigJson["bitrate"];
+		if (bitrateJson.is_number() &&
+		    bitrateJson.int_value() > maxVideoBitrate) {
+			fixVideoTracks = true;
+			currentVideoBitrate = bitrateJson.int_value();
+		}
+	}
+
+	if (fixAudioTracks || fixVideoTracks) {
+		SetPage(PAGE_INVALID_SETTINGS);
+	} else {
+		CreateStream();
+	}
+}
+
+void RedditStartStreamDialog2::UpdateEncoderSettings()
+{
+        auto *main = OBSBasic::Get();
+        auto *config = main->Config();
+
+        config_set_string(config, "Output", "Mode", "Advanced");
+
+	// Update audio settings
 	char track[] = "TrackXBitrate";
-	for (int i = 1; i <= 6; i++) {
+	for (int i = 1; i <= 6; ++i) {
 		sprintf(track, "Track%dBitrate", i);
-		config_set_int(config, "AdvOut", track, audioBitrate);
+		int bitrate = config_get_int(config, "AdvOut", track);
+		if(bitrate > maxAudioBitrate) {
+		        config_set_int(config, "AdvOut", track, maxAudioBitrate);
+		}
 	}
 
-	Json streamEncoder = Json::object{{"bitrate", videoBitrate},
-	                                  {"keyint_sec", maxKeyframeInterval},
-	                                  {"profile", "baseline"},
-	                                  {"rate_control", "ABR"}};
-	string streamEncoderJson = streamEncoder.dump();
-	char jsonPath[512];
-	if (GetProfilePath(jsonPath,
-	                   sizeof(jsonPath),
-	                   "streamEncoder.json") > 0) {
-		os_quick_write_utf8_file_safe(jsonPath,
-		                              streamEncoderJson.c_str(),
-		                              streamEncoderJson.length(), false,
-		                              "tmp", "bak");
+	// Update video settings
+        char jsonPath[512];
+	string parseError;
+        if (GetProfilePath(jsonPath,
+                           sizeof(jsonPath),
+                           "streamEncoder.json") > 0) {
+                char *currentConfig = os_quick_read_utf8_file(jsonPath);
+                Json currentConfigJson = Json::parse(currentConfig, parseError);
+        }
+
+        Json currentEncoderConfigJson = LoadEncoderSettings();
+        Json newConfig;
+	if (currentEncoderConfigJson.is_object()) {
+		Json::object encoderConfig =
+			currentEncoderConfigJson.object_items();
+		if (encoderConfig.find("bitrate") != encoderConfig.end()) {
+                        encoderConfig.erase("bitrate");
+		}
+		encoderConfig.emplace("bitrate", Json(maxVideoBitrate));
+		newConfig = encoderConfig;
+	} else {
+		newConfig = Json::object{{"bitrate", maxVideoBitrate},
+					 {"keyint_sec", maxKeyframeInterval},
+					 {"profile", "baseline"},
+					 {"rate_control", "ABR"}};
 	}
 
-	accept();
+        string streamEncoderJson = newConfig.dump();
+        if (GetProfilePath(jsonPath,
+                           sizeof(jsonPath),
+                           "streamEncoder.json") > 0) {
+                os_quick_write_utf8_file_safe(jsonPath,
+                                              streamEncoderJson.c_str(),
+                                              streamEncoderJson.length(), false,
+                                              "tmp", "bak");
+        }
+
+	CreateStream();
+}
+
+Json RedditStartStreamDialog2::LoadEncoderSettings()
+{
+	string parseError;
+        char encoderJsonPath[512];
+        Json currentEncoderConfigJson;
+        if (GetProfilePath(encoderJsonPath,
+                           sizeof(encoderJsonPath),
+                           "streamEncoder.json") > 0) {
+                char *encoderConfig = os_quick_read_utf8_file(encoderJsonPath);
+                currentEncoderConfigJson = Json::parse(encoderConfig,
+                                                       parseError);
+                bfree(encoderConfig);
+        }
+	return currentEncoderConfigJson;
 }
 
 void RedditStartStreamDialog2::UpdateButtons()
@@ -312,4 +442,17 @@ void RedditStartStreamDialog2::UpdateButtons()
 	                      .trimmed().length() > 0;
 
 	ui->startButton->setEnabled(hasTitle && hasSubreddit);
+}
+
+void RedditStartStreamDialog2::SaveStreamSettings()
+{
+        QString title = ui->titleEdit->text().trimmed();
+        QString subreddit = ui->subredditCombo->currentText().trimmed();
+
+        auto *main = OBSBasic::Get();
+	auto *config = main->Config();
+        config_set_string(config, CONF_SECTION, CONF_STREAM_TITLE,
+                          title.toStdString().c_str());
+        config_set_string(config, CONF_SECTION, CONF_LAST_SUBREDDIT,
+                          subreddit.toStdString().c_str());
 }

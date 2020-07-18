@@ -68,19 +68,20 @@ void RedditLoginDialog2::SignIn()
 	const string newUsername = ui->usernameEdit->text().toStdString();
 	const string password = ui->passwordEdit->text().toStdString();
 
-	if(newUsername.empty()) {
+	if (newUsername.empty()) {
 		ui->errorLabel->setText(Str("Reddit.Login.Error.Username"));
 		return;
 	}
-	if(password.empty()) {
+	if (password.empty()) {
 		ui->errorLabel->setText(Str("Reddit.Login.Error.Password"));
 		return;
 	}
 	string otpCode;
 	if (needsOtp) {
 		otpCode = ui->otpEdit->text().trimmed().toStdString();
-		if(otpCode.empty() || otpCode.length() < 6) {
-			ui->otpErrorLabel->setText(Str("Reddit.Login.2FA.Error.Required"));
+		if (otpCode.empty() || otpCode.length() < 6) {
+			ui->otpErrorLabel->setText(
+				Str("Reddit.Login.2FA.Error.Required"));
 			return;
 		}
 	}
@@ -110,7 +111,7 @@ void RedditLoginDialog2::SignIn()
 }
 
 void RedditLoginDialog2::LoginResult(const QString &text,
-                                     const QString &,
+                                     const QString &errorText,
                                      const QStringList &responseHeaders)
 {
 	string error;
@@ -124,6 +125,8 @@ void RedditLoginDialog2::LoginResult(const QString &text,
 					.string_value();
 				string msg = item.array_items()[1]
 					.string_value();
+
+				blog(LOG_INFO, "Reddit: Login failure: %s", text.toStdString().c_str());
 
 				string err = Str(
 					             "Reddit.Login.Error.Generic.Message")
@@ -148,6 +151,7 @@ void RedditLoginDialog2::LoginResult(const QString &text,
 	if (details.is_string() &&
 	    details.string_value() == "TWO_FA_REQUIRED") {
 		needsOtp = true;
+		blog(LOG_INFO, "Reddit: Account has 2FA enabled");
 		SetPage(PAGE_OTP);
 		return;
 	}

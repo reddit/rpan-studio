@@ -1436,6 +1436,11 @@ void OBSBasicSettings::LoadResolutionLists()
 			ui->baseResolution->addItem(res);
 	};
 
+#if REDDIT_ENABLED
+	// Default RPAN resolution:
+	addRes(480, 854);
+#endif
+
 	for (QScreen *screen : QGuiApplication::screens()) {
 		QSize as = screen->size();
 		addRes(as.width(), as.height());

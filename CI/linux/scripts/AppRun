@@ -1,0 +1,4 @@
+#!/bin/sh
+HERE="$(dirname "$(readlink -f "${0}")")"
+cd ${HERE}/usr
+PYTHONHOME=${HERE}/usr/lib/python3.5 PYTHONPATH=${HERE}/usr/lib/python3.5 exec "${HERE}/usr/bin/obs" "$@"
