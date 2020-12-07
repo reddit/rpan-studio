@@ -9,6 +9,7 @@
 
 #include "api-reddit.hpp"
 #include "obs-frontend-api.h"
+#include "panel-reddit-ama.hpp"
 #include "qt-wrappers.hpp"
 #include "remote-text.hpp"
 #include "window-basic-main.hpp"
@@ -124,7 +125,7 @@ void RedditChatPanel::SetPage(int page)
 
 		auto *main = OBSBasic::Get();
 		auto *broadcastId = config_get_string(main->Config(), "Reddit",
-		                                      "BroadcastId");
+			"BroadcastId");
 
 		auto *thread = RedditApi::FetchStream(broadcastId);
 		connect(thread, &RemoteTextThread::Result, this,
@@ -204,6 +205,31 @@ void RedditChatPanel::ParseComment(const string &author,
 			}
 		}
 
+		QString qAuthor = QString::fromStdString(author);
+		QString body = QString::fromStdString(blockText).remove(
+			QRegExp("<[^>]*>")).trimmed();
+		bool isQuestion = false;
+		if (config_get_bool(OBSBasic::Get()->Config(), "Reddit",
+		                    "AMAMode")) {
+			QString bodyLower = body.toLower();
+			if (bodyLower.contains("#ama") ||
+			    bodyLower.contains("/ama") ||
+			    bodyLower.contains("/q")) {
+				body = body.replace("/ama", "",
+				                    Qt::CaseInsensitive)
+				           .replace(
+					           "#ama", "",
+					           Qt::CaseInsensitive)
+				           .replace(
+					           "/q", "",
+					           Qt::CaseInsensitive)
+				           .trimmed();
+				isQuestion = true;
+			}
+		}
+		if (isQuestion) {
+			RedditAMAPanel::Model()->addQuestion(body, qAuthor);
+		}
 		blocks.emplace_back(blockText);
 	}
 
@@ -267,6 +293,9 @@ void RedditChatPanel::WebsocketError(QAbstractSocket::SocketError error)
 {
 	blog(LOG_ERROR, "Websocket error: (%d) %s", error,
 	     websocket.errorString().toStdString().c_str());
+
+	websocket.close();
+	WebsocketDisconnected();
 }
 
 void RedditChatPanel::MessageReceived(QString message)
@@ -420,7 +449,7 @@ void RedditChatPanel::OnLoadStream(const QString &text,
 QString RedditChatPanel::GetAvatar(const string &authorId)
 {
 	int id = QString::fromStdString(authorId).split('_')[1].toInt(nullptr,
-	                                                              36);
+		36);
 
 	int avatar = (id % avatarCount) + 1;
 	QString color = avatarColors[(id / avatarCount) % avatarColors.size()];
@@ -445,7 +474,8 @@ void RedditChatPanel::ParseCommand(const QString &comment)
 		cursor.movePosition(QTextCursor::End);
 		QTextTable *table = cursor.insertTable(1, 1, tableFormat);
 		table->cellAt(0, 0).firstCursorPosition().insertHtml(
-			QString("<i>Invalid command: %1</i>").arg(comment));
+			QString("<i>Invalid command: %1</i>").arg(
+				comment));
 	}
 }
 

@@ -1,16 +1,4 @@
 function Component() {
-    if (systemInfo.productType === "windows") {
-        installer.installationFinished.connect(
-            this,
-            Component.prototype.installVCRedist
-        );
-    }
-}
-
-Component.prototype.installVCRedist = function() {
-    var dir = installer.value("TargetDir");
-    installer.execute(dir + "/redist/vcredist_x86.exe", "/install", "/norestart", "/passive");
-    installer.execute(dir + "/redist/vcredist_x64.exe", "/install", "/norestart", "/passive");
 }
 
 Component.prototype.createOperations = function() {
@@ -35,6 +23,20 @@ Component.prototype.createOperations = function() {
             "iconPath=@TargetDir@/uninstall.exe",
             "iconId=0",
             "description=Uninstall RPAN Studio"
-        )
+        );
+
+        component.addOperation(
+            "Execute",
+            "@TargetDir@/redist/vcredist_x86.exe",
+            "/norestart",
+            "/passive"
+        );
+
+        component.addOperation(
+            "Execute",
+            "@TargetDir@/redist/vcredist_x64.exe",
+            "/norestart",
+            "/passive"
+        );
     }
 }

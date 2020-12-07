@@ -149,6 +149,32 @@
             </widget>
            </item>
            <item>
+            <spacer name="verticalSpacer_9">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="amaMode">
+             <property name="toolTip">
+              <string>Reddit.StartStream.AMA.Tooltip</string>
+             </property>
+             <property name="text">
+              <string>Reddit.StartStream.AMA</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <spacer name="verticalSpacer_6">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
@@ -168,6 +194,13 @@
             <widget class="QLabel" name="errorLabel">
              <property name="text">
               <string>[Error String]</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="ClickableLabel" name="errorMoreInfo">
+             <property name="text">
+              <string>Reddit.Error.MoreInfo</string>
              </property>
             </widget>
            </item>
@@ -458,6 +491,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ClickableLabel</class>
+   <extends>QLabel</extends>
+   <header>clickable-label.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="obs.qrc"/>
  </resources>

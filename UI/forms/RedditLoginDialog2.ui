@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>633</width>
-    <height>500</height>
+    <width>684</width>
+    <height>568</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -47,7 +47,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>:/res/images/reddit-login-sidebar.png</pixmap>
+      <pixmap resource="obs.qrc">:/res/images/reddit-login-sidebar.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -111,7 +111,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap>:/res/images/reddit.png</pixmap>
+        <pixmap resource="obs.qrc">:/res/images/reddit.png</pixmap>
        </property>
        <property name="scaledContents">
         <bool>true</bool>
@@ -141,28 +141,38 @@
       </widget>
      </item>
      <item>
-      <spacer name="verticalSpacer_3">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
       <widget class="QStackedWidget" name="stack">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="usernamePage">
         <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Reddit.Login.TermsOfService</string>
+           </property>
+           <property name="openExternalLinks">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
          <item>
           <widget class="QLabel" name="label_4">
            <property name="text">
@@ -244,6 +254,13 @@
           <widget class="QLabel" name="errorLabel">
            <property name="text">
             <string>[Error String]</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="ClickableLabel" name="errorMoreInfo">
+           <property name="text">
+            <string>Reddit.Error.MoreInfo</string>
            </property>
           </widget>
          </item>
@@ -380,6 +397,22 @@
        <widget class="QWidget" name="otpPage">
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
+          <spacer name="verticalSpacer_9">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Fixed</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
           <widget class="QLabel" name="label_11">
            <property name="text">
             <string>Reddit.Login.2FA.Message</string>
@@ -443,6 +476,13 @@
           <widget class="QLabel" name="otpErrorLabel">
            <property name="text">
             <string>[Error String]</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="ClickableLabel" name="otpErrorMoreInfo">
+           <property name="text">
+            <string>Reddit.Error.MoreInfo</string>
            </property>
           </widget>
          </item>
@@ -559,7 +599,16 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <customwidgets>
+  <customwidget>
+   <class>ClickableLabel</class>
+   <extends>QLabel</extends>
+   <header>clickable-label.hpp</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="obs.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>cancelButton</sender>

@@ -3,15 +3,15 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIconFile</key>
-	<string>obs.icns</string>
+	<string>rpan-studio.icns</string>
 	<key>CFBundleName</key>
-	<string>OBS</string>
+	<string>RPAN Studio</string>
 	<key>CFBundleGetInfoString</key>
-	<string>OBS - Free and Open Source Streaming/Recording Software</string>
+	<string>RPAN Studio - Stream directly to the Reddit Public Access Network!</string>
 	<key>CFBundleExecutable</key>
 	<string>obs</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.obsproject.obs-studio</string>
+	<string>com.reddit.rpan-studio</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>LSMinimumSystemVersion</key>
@@ -21,8 +21,8 @@
 	<key>LSAppNapIsDisabled</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
- 	<string>OBS needs to access the camera to enable camera sources to work.</string>
+ 	<string>RPAN Studio needs to access the camera to enable camera sources to work.</string>
  	<key>NSMicrophoneUsageDescription</key>
- 	<string>OBS needs to access the microphone to enable audio input.</string>
+ 	<string>RPAN Studio needs to access the microphone to enable audio input.</string>
 </dict>
 </plist>

@@ -98,9 +98,9 @@ else()
 	set(OBS_PLUGIN_DESTINATION "${OBS_LIBRARY_DESTINATION}/obs-plugins")
 	set(OBS_PLUGIN32_DESTINATION "${OBS_LIBRARY32_DESTINATION}/obs-plugins")
 	set(OBS_PLUGIN64_DESTINATION "${OBS_LIBRARY64_DESTINATION}/obs-plugins")
-	set(OBS_DATA_DESTINATION "share/obs")
+	set(OBS_DATA_DESTINATION "share/rpan-studio")
 	set(OBS_CMAKE_DESTINATION "${OBS_LIBRARY_DESTINATION}/cmake")
-	set(OBS_INCLUDE_DESTINATION "include/obs")
+	set(OBS_INCLUDE_DESTINATION "include/rpan-studio")
 
 	set(OBS_DATA_PATH "${OBS_DATA_DESTINATION}")
 	set(OBS_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/")
@@ -500,6 +500,23 @@ function(install_obs_data target datadir datadest)
 		add_custom_command(TARGET ${target} POST_BUILD
 			COMMAND "${CMAKE_COMMAND}" -E copy_directory
 				"${CMAKE_CURRENT_SOURCE_DIR}/${datadir}" "$ENV{obsInstallerTempDir}/${OBS_DATA_DESTINATION}/${datadest}"
+			VERBATIM)
+	endif()
+endfunction()
+
+function(install_obs_data_from_abs_path target datadir datadest)
+	install(DIRECTORY ${datadir}/
+		DESTINATION "${OBS_DATA_DESTINATION}/${datadest}"
+		USE_SOURCE_PERMISSIONS)
+	add_custom_command(TARGET ${target} POST_BUILD
+		COMMAND "${CMAKE_COMMAND}" -E copy_directory
+			"${datadir}" "${OBS_OUTPUT_DIR}/$<CONFIGURATION>/data/${datadest}"
+		VERBATIM)
+
+	if(CMAKE_SIZEOF_VOID_P EQUAL 8 AND DEFINED ENV{obsInstallerTempDir})
+		add_custom_command(TARGET ${target} POST_BUILD
+			COMMAND "${CMAKE_COMMAND}" -E copy_directory
+				"${datadir}" "$ENV{obsInstallerTempDir}/${OBS_DATA_DESTINATION}/${datadest}"
 			VERBATIM)
 	endif()
 endfunction()

@@ -3,6 +3,7 @@
 #include "auth-oauth.hpp"
 
 class QDockWidget;
+class RedditStartStreamDialog2;
 
 class RedditAuth : public OAuthStreamKey {
 Q_OBJECT
@@ -28,6 +29,10 @@ public:
 	std::shared_ptr<std::string> GetUsername() { return std::make_shared<std::string>(username); }
 
 private:
+	friend class RedditStartStreamDialog2;
+	friend class RedditAMAPanel;
+	
+private:
 	bool RefreshAccessToken();
 
 private:
@@ -39,6 +44,8 @@ private:
 
 	QScopedPointer<QDockWidget> chatPanel;
 	QScopedPointer<QDockWidget> statsPanel;
+	QScopedPointer<QDockWidget> amaPanel;
 	QScopedPointer<QAction> chatMenu;
 	QScopedPointer<QAction> statsMenu;
+	QScopedPointer<QAction> amaMenu;
 };

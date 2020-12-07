@@ -119,7 +119,7 @@
      <item>
       <widget class="QStackedWidget" name="settingsPages">
        <property name="currentIndex">
-        <number>0</number>
+        <number>2</number>
        </property>
        <widget class="QWidget" name="generalPage">
         <layout class="QVBoxLayout" name="verticalLayout_18">
@@ -151,8 +151,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>803</width>
-              <height>1026</height>
+              <width>806</width>
+              <height>1254</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_19">
@@ -1213,33 +1213,7 @@
                </property>
               </widget>
              </item>
-             <item row="7" column="0">
-              <widget class="QLabel" name="twitchAddonLabel">
-               <property name="text">
-                <string>Basic.Settings.Stream.TTVAddon</string>
-               </property>
-               <property name="buddy">
-                <cstring>twitchAddonDropdown</cstring>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="1">
-              <widget class="QComboBox" name="twitchAddonDropdown"/>
-             </item>
              <item row="8" column="0">
-              <widget class="QLabel" name="mixerAddonLabel">
-               <property name="text">
-                <string>Basic.Settings.Stream.MixerAddon</string>
-               </property>
-               <property name="buddy">
-                <cstring>mixerAddonDropdown</cstring>
-               </property>
-              </widget>
-             </item>
-             <item row="8" column="1">
-              <widget class="QComboBox" name="mixerAddonDropdown"/>
-             </item>
-             <item row="9" column="0">
               <widget class="QLabel" name="authUsernameLabel">
                <property name="text">
                 <string>Basic.Settings.Stream.Custom.Username</string>
@@ -1249,10 +1223,10 @@
                </property>
               </widget>
              </item>
-             <item row="9" column="1">
+             <item row="8" column="1">
               <widget class="QLineEdit" name="authUsername"/>
              </item>
-             <item row="10" column="0">
+             <item row="9" column="0">
               <widget class="QLabel" name="authPwLabel">
                <property name="text">
                 <string>Basic.Settings.Stream.Custom.Password</string>
@@ -1262,7 +1236,7 @@
                </property>
               </widget>
              </item>
-             <item row="10" column="1">
+             <item row="9" column="1">
               <widget class="QWidget" name="authPwWidget" native="true">
                <layout class="QHBoxLayout" name="horizontalLayout_25">
                 <property name="leftMargin">
@@ -1292,6 +1266,19 @@
                  </widget>
                 </item>
                </layout>
+              </widget>
+             </item>
+             <item row="7" column="1">
+              <widget class="QComboBox" name="twitchAddonDropdown"/>
+             </item>
+             <item row="7" column="0">
+              <widget class="QLabel" name="twitchAddonLabel">
+               <property name="text">
+                <string>Basic.Settings.Stream.TTVAddon</string>
+               </property>
+               <property name="buddy">
+                <cstring>twitchAddonDropdown</cstring>
+               </property>
               </widget>
              </item>
             </layout>
@@ -1330,8 +1317,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>603</width>
-              <height>612</height>
+              <width>813</width>
+              <height>761</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_21">
@@ -1410,7 +1397,7 @@
              <item>
               <widget class="QStackedWidget" name="outputModePages">
                <property name="currentIndex">
-                <number>0</number>
+                <number>1</number>
                </property>
                <widget class="QWidget" name="easyOutputsPage">
                 <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1908,7 +1895,7 @@
                  <item>
                   <widget class="QTabWidget" name="advOutTabs">
                    <property name="currentIndex">
-                    <number>0</number>
+                    <number>1</number>
                    </property>
                    <property name="usesScrollButtons">
                     <bool>true</bool>
@@ -2176,7 +2163,7 @@
                      <item>
                       <widget class="QStackedWidget" name="stackedWidget">
                        <property name="currentIndex">
-                        <number>0</number>
+                        <number>1</number>
                        </property>
                        <widget class="QWidget" name="advOutRecStandard">
                         <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -3825,8 +3812,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>555</width>
-              <height>469</height>
+              <width>767</width>
+              <height>582</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_50">
@@ -4634,8 +4621,8 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>98</width>
-           <height>28</height>
+           <width>818</width>
+           <height>675</height>
           </rect>
          </property>
          <layout class="QFormLayout" name="hotkeyLayout">
@@ -4681,8 +4668,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>596</width>
-              <height>781</height>
+              <width>791</width>
+              <height>970</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_23">
@@ -4889,6 +4876,11 @@
                      </property>
                      <item>
                       <widget class="QComboBox" name="colorSpace">
+                       <item>
+                        <property name="text">
+                         <string notr="true">sRGB</string>
+                        </property>
+                       </item>
                        <item>
                         <property name="text">
                          <string notr="true">709</string>
@@ -5422,6 +5414,38 @@
                   </layout>
                  </widget>
                 </item>
+                <item>
+                 <widget class="QGroupBox" name="advRedditGroupBox">
+                  <property name="title">
+                   <string>Basic.Settings.Reddit.Experimental</string>
+                  </property>
+                  <layout class="QFormLayout" name="formLayout_8">
+                   <item row="0" column="0">
+                    <spacer name="horizontalSpacer_27">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>170</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QCheckBox" name="redditAmaModeCheckBox">
+                     <property name="toolTip">
+                      <string>Reddit.Experimental.AMAMode.Tooltip</string>
+                     </property>
+                     <property name="text">
+                      <string>Reddit.Experimental.AMAMode</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
                </layout>
               </widget>
              </item>
@@ -5521,8 +5545,10 @@
   <tabstop>overflowHide</tabstop>
   <tabstop>overflowAlwaysVisible</tabstop>
   <tabstop>overflowSelectionHide</tabstop>
+  <tabstop>automaticSearch</tabstop>
   <tabstop>doubleClickSwitch</tabstop>
   <tabstop>studioPortraitLayout</tabstop>
+  <tabstop>prevProgLabelToggle</tabstop>
   <tabstop>multiviewMouseSwitch</tabstop>
   <tabstop>multiviewDrawNames</tabstop>
   <tabstop>multiviewDrawAreas</tabstop>
@@ -5534,9 +5560,12 @@
   <tabstop>customServer</tabstop>
   <tabstop>key</tabstop>
   <tabstop>show</tabstop>
+  <tabstop>getStreamKeyButton</tabstop>
   <tabstop>connectAccount2</tabstop>
   <tabstop>disconnectAccount</tabstop>
+  <tabstop>bandwidthTestEnable</tabstop>
   <tabstop>useAuth</tabstop>
+  <tabstop>twitchAddonDropdown</tabstop>
   <tabstop>authUsername</tabstop>
   <tabstop>authPw</tabstop>
   <tabstop>authPwShow</tabstop>
@@ -5575,6 +5604,12 @@
   <tabstop>advOutRecPathBrowse</tabstop>
   <tabstop>advOutNoSpace</tabstop>
   <tabstop>advOutRecFormat</tabstop>
+  <tabstop>flvTrack1</tabstop>
+  <tabstop>flvTrack2</tabstop>
+  <tabstop>flvTrack3</tabstop>
+  <tabstop>flvTrack4</tabstop>
+  <tabstop>flvTrack5</tabstop>
+  <tabstop>flvTrack6</tabstop>
   <tabstop>advOutRecTrack1</tabstop>
   <tabstop>advOutRecTrack2</tabstop>
   <tabstop>advOutRecTrack3</tabstop>
@@ -5623,6 +5658,7 @@
   <tabstop>advReplayBuf</tabstop>
   <tabstop>advRBSecMax</tabstop>
   <tabstop>advRBMegsMax</tabstop>
+  <tabstop>scrollArea_50</tabstop>
   <tabstop>sampleRate</tabstop>
   <tabstop>channelSetup</tabstop>
   <tabstop>desktopAudioDevice1</tabstop>
@@ -5635,6 +5671,8 @@
   <tabstop>peakMeterType</tabstop>
   <tabstop>monitoringDevice</tabstop>
   <tabstop>disableAudioDucking</tabstop>
+  <tabstop>baseResolution</tabstop>
+  <tabstop>outputResolution</tabstop>
   <tabstop>downscaleFilter</tabstop>
   <tabstop>fpsType</tabstop>
   <tabstop>fpsCommon</tabstop>
@@ -5662,9 +5700,11 @@
   <tabstop>reconnectRetryDelay</tabstop>
   <tabstop>reconnectMaxRetries</tabstop>
   <tabstop>bindToIP</tabstop>
+  <tabstop>dynBitrate</tabstop>
   <tabstop>enableNewSocketLoop</tabstop>
   <tabstop>enableLowLatencyMode</tabstop>
   <tabstop>browserHWAccel</tabstop>
+  <tabstop>hotkeyFocusType</tabstop>
  </tabstops>
  <resources>
   <include location="obs.qrc"/>

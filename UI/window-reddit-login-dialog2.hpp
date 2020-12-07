@@ -5,7 +5,7 @@
 #include "ui_RedditLoginDialog2.h"
 
 class RedditLoginDialog2 : public QDialog {
-	Q_OBJECT
+Q_OBJECT
 
 public:
 	explicit RedditLoginDialog2(QWidget *parent = nullptr);
@@ -31,11 +31,18 @@ private:
 
 	QScopedPointer<QThread> loginThread;
 	QScopedPointer<QThread> authThread;
+	QScopedPointer<QString> serverTextResponse;
+	QScopedPointer<QString> serverErrorResponse;
+	QString errorStep;
 
 private slots:
+	void ErrorMoreInfo();
+	
 	void SignIn();
 
-	void LoginResult(const QString &text, const QString &, const QStringList &responseHeaders);
+	void LoginResult(const QString &text, const QString &error,
+	                 const QStringList &responseHeaders);
 
-	void AuthorizeResult(const QString &text, const QString &, const QStringList &responseHeaders);
+	void AuthorizeResult(const QString &text, const QString &error,
+	                     const QStringList &responseHeaders);
 };

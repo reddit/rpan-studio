@@ -41,7 +41,9 @@ static inline bool check_path(const char *data, const char *path,
 	return (access(output.c_str(), R_OK) == 0);
 }
 
-#define INSTALL_DATA_PATH OBS_INSTALL_PREFIX OBS_DATA_PATH "/obs-studio/"
+#define INSTALL_DATA_PATH OBS_INSTALL_PREFIX OBS_DATA_PATH "/" CONFIG_DIR_NAME "/"
+// When running from the build rundir
+#define RUNDIR_DATA_PATH OBS_RELATIVE_PREFIX OBS_RELATIVE_PREFIX "data/" CONFIG_DIR_NAME "/"
 
 bool GetDataFilePath(const char *data, string &output)
 {
@@ -51,9 +53,11 @@ bool GetDataFilePath(const char *data, string &output)
 			return true;
 	}
 
-	if (check_path(data, OBS_DATA_PATH "/obs-studio/", output))
+	if (check_path(data, OBS_DATA_PATH "/" CONFIG_DIR_NAME "/", output))
 		return true;
 	if (check_path(data, INSTALL_DATA_PATH, output))
+		return true;
+	if (check_path(data, RUNDIR_DATA_PATH, output))
 		return true;
 
 	return false;
@@ -72,6 +76,7 @@ string GetDefaultVideoSavePath()
 vector<string> GetPreferredLocales()
 {
 	setlocale(LC_ALL, "");
+	vector<string> matched;
 	string messages = setlocale(LC_MESSAGES, NULL);
 	if (!messages.size() || messages == "C" || messages == "POSIX")
 		return {};
@@ -85,10 +90,10 @@ vector<string> GetPreferredLocales()
 			return {locale};
 
 		if (locale.substr(0, 2) == messages.substr(0, 2))
-			return {locale};
+			matched.push_back(locale);
 	}
 
-	return {};
+	return matched;
 }
 
 bool IsAlwaysOnTop(QWidget *window)

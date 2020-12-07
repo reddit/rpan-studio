@@ -51,10 +51,11 @@ const char *get_module_extension(void)
 #endif
 
 static const char *module_bin[] = {"../../obs-plugins/" BIT_STRING,
-				   OBS_INSTALL_PREFIX
-				   "/" OBS_PLUGIN_DESTINATION};
+                                   OBS_PLUGIN_DESTINATION,
+				   OBS_INSTALL_PREFIX "/" OBS_PLUGIN_DESTINATION};
 
 static const char *module_data[] = {
+	OBS_RELATIVE_PREFIX OBS_RELATIVE_PREFIX "data/obs-plugins/%module%",
 	OBS_DATA_PATH "/obs-plugins/%module%",
 	OBS_INSTALL_DATA_PATH "/obs-plugins/%module%",
 };
@@ -71,6 +72,7 @@ void add_default_module_paths(void)
 /*
  *   /usr/local/share/libobs
  *   /usr/share/libobs
+ *   ../../data/libobs
  */
 char *find_libobs_data_file(const char *file)
 {
@@ -84,6 +86,9 @@ char *find_libobs_data_file(const char *file)
 		if (check_path(file, OBS_INSTALL_DATA_PATH "/libobs/", &output))
 			return output.array;
 	}
+
+        if (check_path(file, OBS_RELATIVE_PREFIX OBS_RELATIVE_PREFIX "data/libobs/", &output))
+                return output.array;
 
 	dstr_free(&output);
 	return NULL;

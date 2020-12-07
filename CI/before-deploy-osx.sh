@@ -41,8 +41,8 @@ fi
 # Move obspython
 if [ ! -f ./rundir/${BUILD_TYPE}/bin/_obspython.so ] ; then
     hr "Moving OBS Python"
-    mv ./rundir/${BUILD_TYPE}/data/obs-scripting/_obspython.so ./rundir/${BUILD_TYPE}/bin/
-    mv ./rundir/${BUILD_TYPE}/data/obs-scripting/obspython.py ./rundir/${BUILD_TYPE}/bin/
+    #mv ./rundir/${BUILD_TYPE}/data/obs-scripting/_obspython.so ./rundir/${BUILD_TYPE}/bin/
+    #mv ./rundir/${BUILD_TYPE}/data/obs-scripting/obspython.py ./rundir/${BUILD_TYPE}/bin/
 fi
 
 # Package everything into a nice .app
@@ -57,19 +57,33 @@ fi
 ../CI/install/osx-rpan/packageApp.sh
 
 # fix obs outputs plugin it doesn't play nicely with dylibBundler at the moment
-#cp /usr/local/opt/mbedtls/lib/libmbedtls.12.dylib ./RPANStudio.app/Contents/Frameworks/
-#cp /usr/local/opt/mbedtls/lib/libmbedcrypto.3.dylib ./RPANStudio.app/Contents/Frameworks/
-#cp /usr/local/opt/mbedtls/lib/libmbedx509.0.dylib ./RPANStudio.app/Contents/Frameworks/
-#chmod +w ./RPANStudio.app/Contents/Frameworks/*.dylib
-#install_name_tool -id @executable_path/../Frameworks/libmbedtls.12.dylib ./RPANStudio.app/Contents/Frameworks/libmbedtls.12.dylib
-#install_name_tool -id @executable_path/../Frameworks/libmbedcrypto.3.dylib ./RPANStudio.app/Contents/Frameworks/libmbedcrypto.3.dylib
-#install_name_tool -id @executable_path/../Frameworks/libmbedx509.0.dylib ./RPANStudio.app/Contents/Frameworks/libmbedx509.0.dylib
-#install_name_tool -change libmbedtls.12.dylib @executable_path/../Frameworks/libmbedtls.12.dylib ./RPANStudio.app/Contents/Plugins/obs-outputs.so
-#install_name_tool -change libmbedcrypto.3.dylib @executable_path/../Frameworks/libmbedcrypto.3.dylib ./RPANStudio.app/Contents/Plugins/obs-outputs.so
-#install_name_tool -change libmbedx509.0.dylib @executable_path/../Frameworks/libmbedx509.0.dylib ./RPANStudio.app/Contents/Plugins/obs-outputs.so
-#install_name_tool -change /usr/local/opt/curl/lib/libcurl.4.dylib @executable_path/../Frameworks/libcurl.4.dylib ./RPANStudio.app/Contents/Plugins/obs-outputs.so
-#install_name_tool -change @rpath/libobs.0.dylib @executable_path/../Frameworks/libobs.0.dylib ./RPANStudio.app/Contents/Plugins/obs-outputs.so
-#install_name_tool -change /tmp/obsdeps/bin/libjansson.4.dylib @executable_path/../Frameworks/libjansson.4.dylib ./RPANStudio.app/Contents/Plugins/obs-outputs.so
+#if [ -f /usr/local/opt/mbedtls/lib/libmbedtls.12.dylib ]; then
+#    cp /usr/local/opt/mbedtls/lib/libmbedtls.12.dylib ./OBS.app/Contents/Frameworks/
+#    cp /usr/local/opt/mbedtls/lib/libmbedcrypto.3.dylib ./OBS.app/Contents/Frameworks/
+#    cp /usr/local/opt/mbedtls/lib/libmbedx509.0.dylib ./OBS.app/Contents/Frameworks/
+#    chmod +w ./OBS.app/Contents/Frameworks/*.dylib
+#    install_name_tool -id @executable_path/../Frameworks/libmbedtls.12.dylib ./OBS.app/Contents/Frameworks/libmbedtls.12.dylib
+#    install_name_tool -id @executable_path/../Frameworks/libmbedcrypto.3.dylib ./OBS.app/Contents/Frameworks/libmbedcrypto.3.dylib
+#    install_name_tool -id @executable_path/../Frameworks/libmbedx509.0.dylib ./OBS.app/Contents/Frameworks/libmbedx509.0.dylib
+#    install_name_tool -change libmbedtls.12.dylib @executable_path/../Frameworks/libmbedtls.12.dylib ./OBS.app/Contents/Plugins/obs-outputs.so
+#    install_name_tool -change libmbedcrypto.3.dylib @executable_path/../Frameworks/libmbedcrypto.3.dylib ./OBS.app/Contents/Plugins/obs-outputs.so
+#    install_name_tool -change libmbedx509.0.dylib @executable_path/../Frameworks/libmbedx509.0.dylib ./OBS.app/Contents/Plugins/obs-outputs.so
+#elif [ -f /usr/local/opt/mbedtls/lib/libmbedtls.13.dylib ]; then
+#    cp /usr/local/opt/mbedtls/lib/libmbedtls.13.dylib ./OBS.app/Contents/Frameworks/
+#    cp /usr/local/opt/mbedtls/lib/libmbedcrypto.5.dylib ./OBS.app/Contents/Frameworks/
+#    cp /usr/local/opt/mbedtls/lib/libmbedx509.1.dylib ./OBS.app/Contents/Frameworks/
+#    chmod +w ./OBS.app/Contents/Frameworks/*.dylib
+#    install_name_tool -id @executable_path/../Frameworks/libmbedtls.13.dylib ./OBS.app/Contents/Frameworks/libmbedtls.13.dylib
+#    install_name_tool -id @executable_path/../Frameworks/libmbedcrypto.5.dylib ./OBS.app/Contents/Frameworks/libmbedcrypto.5.dylib
+#    install_name_tool -id @executable_path/../Frameworks/libmbedx509.1.dylib ./OBS.app/Contents/Frameworks/libmbedx509.1.dylib
+#    install_name_tool -change libmbedtls.13.dylib @executable_path/../Frameworks/libmbedtls.13.dylib ./OBS.app/Contents/Plugins/obs-outputs.so
+#    install_name_tool -change libmbedcrypto.5.dylib @executable_path/../Frameworks/libmbedcrypto.5.dylib ./OBS.app/Contents/Plugins/obs-outputs.so
+#    install_name_tool -change libmbedx509.1.dylib @executable_path/../Frameworks/libmbedx509.1.dylib ./OBS.app/Contents/Plugins/obs-outputs.so
+#fi
+#
+#install_name_tool -change /usr/local/opt/curl/lib/libcurl.4.dylib @executable_path/../Frameworks/libcurl.4.dylib ./OBS.app/Contents/Plugins/obs-outputs.so
+#install_name_tool -change @rpath/libobs.0.dylib @executable_path/../Frameworks/libobs.0.dylib ./OBS.app/Contents/Plugins/obs-outputs.so
+#install_name_tool -change /tmp/obsdeps/bin/libjansson.4.dylib @executable_path/../Frameworks/libjansson.4.dylib ./OBS.app/Contents/Plugins/obs-outputs.so
 
 # copy sparkle into the app
 #hr "Copying Sparkle.framework"

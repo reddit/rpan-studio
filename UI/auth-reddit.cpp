@@ -3,12 +3,11 @@
 #include <QInputDialog>
 
 #include <qt-wrappers.hpp>
-#include <json11.hpp>
-
 
 #include "api-reddit.hpp"
 #include "panel-reddit-chat.hpp"
 #include "panel-reddit-stats.hpp"
+#include "panel-reddit-ama.hpp"
 #include "remote-text.hpp"
 #include "window-basic-main.hpp"
 #include "window-reddit-login-dialog2.hpp"
@@ -118,6 +117,12 @@ void RedditAuth::LoadUI()
 	statsPanel.reset(new RedditStatsPanel());
 	main->addDockWidget(Qt::RightDockWidgetArea, statsPanel.data());
 	statsMenu.reset(main->AddDockWidget(statsPanel.data()));
+
+	amaPanel.reset(new RedditAMAPanel());
+	amaPanel->setAllowedAreas(Qt::LeftDockWidgetArea);
+	amaPanel->close();
+	amaMenu.reset(main->AddDockWidget(amaPanel.data()));
+	amaMenu->setVisible(false);
 
 	uiLoaded = true;
 }

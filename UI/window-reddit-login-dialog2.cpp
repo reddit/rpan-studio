@@ -7,6 +7,7 @@
 
 #include "api-reddit.hpp"
 #include "window-basic-main.hpp"
+#include "window-reddit-error-log.hpp"
 
 using namespace std;
 using namespace json11;
@@ -24,14 +25,24 @@ RedditLoginDialog2::RedditLoginDialog2(QWidget *parent)
 	setWindowFlag(Qt::WindowContextHelpButtonHint, false);
 
 	ui->forgotPasswordLink->setText(
-		"<a href='https://www.reddit.com/password'>" + QTStr(
-			"Reddit.Login.Links.ForgotPassword") + "</a>");
+		QString("<a href='https://www.reddit.com/password'>%1</a>").arg(
+			QTStr("Reddit.Login.Links.ForgotPassword")));
 	ui->forgotUsernameLink->setText(
-		"<a href='https://www.reddit.com/username'>" + QTStr(
-			"Reddit.Login.Links.ForgotUsername") + "</a>");
+		QString("<a href='https://www.reddit.com/username'>%1</a>").arg(
+			QTStr("Reddit.Login.Links.ForgotUsername")));
 	ui->signupLink->setText(
-		"<a href='https://www.reddit.com/register/'>" + QTStr(
-			"Reddit.Login.Links.Signup") + "</a>");
+		QString("<a href='https://www.reddit.com/register/'>%1</a>").
+		arg(
+			QTStr("Reddit.Login.Links.Signup")));
+
+	ui->errorMoreInfo->setText(
+		QString("<a href='#'>%1</a>").arg(
+			ui->errorMoreInfo->text()));
+	ui->errorMoreInfo->setVisible(false);
+	ui->otpErrorMoreInfo->setText(
+		QString("<a href='#'>%1</a>").arg(
+			ui->otpErrorMoreInfo->text()));
+	ui->otpErrorMoreInfo->setVisible(false);
 
 	ui->errorLabel->setText("");
 	ui->otpErrorLabel->setText("");
@@ -40,6 +51,10 @@ RedditLoginDialog2::RedditLoginDialog2(QWidget *parent)
 	ui->stack->setCurrentIndex(PAGE_SIGNIN);
 
 	connect(ui->signinButton, SIGNAL(clicked()), this, SLOT(SignIn()));
+	connect(ui->errorMoreInfo, SIGNAL(clicked()), this,
+	        SLOT(ErrorMoreInfo()));
+	connect(ui->otpErrorMoreInfo, SIGNAL(clicked()), this,
+	        SLOT(ErrorMoreInfo()));
 }
 
 void RedditLoginDialog2::SetPage(int page)
@@ -61,6 +76,19 @@ void RedditLoginDialog2::SetPage(int page)
 		ui->signinButton->setEnabled(false);
 		break;
 	}
+}
+
+void RedditLoginDialog2::ErrorMoreInfo()
+{
+	QString logStr =
+		QString("Server response:\n%1").arg(*serverTextResponse);
+	if (!serverErrorResponse->isEmpty()) {
+		logStr.append(QString("\n\nServer error response:\n%1")
+			.arg(*serverErrorResponse));
+	}
+
+	RedditErrorLogDialog dlg(this, errorStep, logStr);
+	dlg.exec();
 }
 
 void RedditLoginDialog2::SignIn()
@@ -119,33 +147,39 @@ void RedditLoginDialog2::LoginResult(const QString &text,
 	const Json loginJsonData = loginJson["json"]["data"];
 	if (!loginJsonData.is_object()) {
 		const Json errors = loginJson["json"]["errors"];
+		string msg;
 		if (errors.is_array() && errors.array_items().size() > 0) {
 			for (const Json item : errors.array_items()) {
-				string type = item.array_items()[0]
+				msg = item.array_items()[1]
 					.string_value();
-				string msg = item.array_items()[1]
-					.string_value();
-
-				blog(LOG_INFO, "Reddit: Login failure: %s", text.toStdString().c_str());
-
-				string err = Str(
-					             "Reddit.Login.Error.Generic.Message")
-				             + msg;
-
-				if (needsOtp) {
-					ui->otpErrorLabel->setText(
-						QString::fromStdString(err)
-						);
-					SetPage(PAGE_OTP);
-				} else {
-					ui->errorLabel->setText(
-						QString::fromStdString(err)
-						);
-					SetPage(PAGE_SIGNIN);
-				}
-				return;
+				break;
 			}
 		}
+
+		if (msg.empty()) {
+			msg = Str("Reddit.Error.Unknown");
+		}
+
+		blog(LOG_INFO, "Reddit: Login failure: %s",
+		     text.toStdString().c_str());
+
+		string err = Str("Reddit.Login.Error.Generic.Message") + msg;
+
+		if (needsOtp) {
+			ui->otpErrorLabel->setText(QString::fromStdString(err));
+			ui->otpErrorMoreInfo->setVisible(true);
+			SetPage(PAGE_OTP);
+		} else {
+			ui->errorLabel->setText(QString::fromStdString(err));
+			ui->errorMoreInfo->setVisible(true);
+			SetPage(PAGE_SIGNIN);
+		}
+
+		serverTextResponse.reset(new QString(text));
+		serverErrorResponse.reset(new QString(errorText));
+		errorStep = QTStr("Reddit.ErrorLog.Step.Login");
+
+		return;
 	}
 	const Json details = loginJsonData["details"];
 	if (details.is_string() &&
@@ -182,7 +216,7 @@ void RedditLoginDialog2::LoginResult(const QString &text,
 }
 
 void RedditLoginDialog2::AuthorizeResult(const QString &text,
-                                         const QString &,
+                                         const QString &errorText,
                                          const QStringList &responseHeaders)
 {
 	string error;

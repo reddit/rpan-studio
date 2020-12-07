@@ -41,13 +41,13 @@ bool GetDataFilePath(const char *data, string &output)
 			[NSRunningApplication currentApplication];
 		NSURL *bundleURL = [app bundleURL];
 		NSString *path = [NSString
-			stringWithFormat:@"Contents/Resources/data/obs-studio/%@",
+			stringWithFormat:@"Contents/Resources/data/rpan-studio/%@",
 					 [NSString stringWithUTF8String:data]];
 		NSURL *dataURL = [bundleURL URLByAppendingPathComponent:path];
 		output = [[dataURL path] UTF8String];
 	} else {
 		stringstream str;
-		str << OBS_DATA_PATH "/obs-studio/" << data;
+		str << OBS_DATA_PATH "/rpan-studio/" << data;
 		output = str.str();
 	}
 
@@ -144,14 +144,29 @@ bool IsAlwaysOnTop(QWidget *window)
 	return (window->windowFlags() & Qt::WindowStaysOnTopHint) != 0;
 }
 
+void disableColorSpaceConversion(QWidget *window)
+{
+	NSView *view =
+		(__bridge NSView *)reinterpret_cast<void *>(window->winId());
+	view.window.colorSpace = NSColorSpace.sRGBColorSpace;
+}
+
 void SetAlwaysOnTop(QWidget *window, bool enable)
 {
 	Qt::WindowFlags flags = window->windowFlags();
 
-	if (enable)
+	if (enable) {
+		/* Force the level of the window high so it sits on top of
+		 * full-screen applications like Keynote */
+		NSView *nsv = (__bridge NSView *)reinterpret_cast<void *>(
+			window->winId());
+		NSWindow *nsw = nsv.window;
+		[nsw setLevel:1024];
+
 		flags |= Qt::WindowStaysOnTopHint;
-	else
+	} else {
 		flags &= ~Qt::WindowStaysOnTopHint;
+	}
 
 	window->setWindowFlags(flags);
 	window->show();

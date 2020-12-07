@@ -3,8 +3,11 @@
     <Name>com.reddit.rpanstudio</Name>
     <DisplayName>RPAN Studio</DisplayName>
     <Description>RPAN Studio Application</Description>
-    <Version>25.0.7.6</Version>
-    <ReleaseDate>2020-07-01</ReleaseDate>
+    <Version>26.0.2.0</Version>
+    <ReleaseDate>2020-12-01</ReleaseDate>
     <ForcedInstallation>true</ForcedInstallation>
     <Script>installscript.qs</Script>
+    <Essential>true</Essential>
+    <UpdateText>Updating RPAN Studio</UpdateText>
+    <!-- <Replaces>com.reddit.rpanstudio</Replaces> -->
 </Package>

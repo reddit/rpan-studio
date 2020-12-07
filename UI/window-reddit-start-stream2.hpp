@@ -40,7 +40,13 @@ private:
 	int currentAudioBitrate = 0;
 	int currentVideoBitrate = 0;
 
+	QScopedPointer<QString> serverTextResponse;
+	QScopedPointer<QString> serverErrorResponse;
+	QString errorStep;
+
 private slots:
+	void ErrorMoreInfo();
+	
 	void CreateStream();
 	void ValidateConfig();
 

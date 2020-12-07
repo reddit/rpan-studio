@@ -2,6 +2,7 @@
   <qresource prefix="/res">
     <file>images/save.svg</file>
     <file>images/media-pause.svg</file>
+    <file>images/filter.svg</file>
     <file>images/mute.svg</file>
     <file>images/refresh.svg</file>
     <file>images/no_sources.svg</file>
@@ -40,11 +41,19 @@
     <file>images/recording-pause-inactive.svg</file>
     <file>images/streaming-active.svg</file>
     <file>images/streaming-inactive.svg</file>
+    <file>images/media/media_play.svg</file>
+    <file>images/media/media_pause.svg</file>
+    <file>images/media/media_next.svg</file>
+    <file>images/media/media_previous.svg</file>
+    <file>images/media/media_restart.svg</file>
+    <file>images/media/media_stop.svg</file>
     <file>images/reddit-login-sidebar.png</file>
     <file>images/reddit.png</file>
     <file>images/start-stream-sidebar-3.png</file>
     <file>images/ok.png</file>
     <file>images/invalid.png</file>
+    <file>images/ok_32.png</file>
+    <file>images/invalid_32.png</file>
   </qresource>
   <qresource prefix="/settings">
     <file>images/settings/output.svg</file>
