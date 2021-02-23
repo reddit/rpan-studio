@@ -143,90 +143,6 @@ check_ccache() {
     info "${CCACHE_STATUS}"
 }
 
-install_obs-deps() {
-    hr "Setting up pre-built macOS dependencies v${1}"
-    ensure_dir ${DEPS_BUILD_DIR}
-    step "Download..."
-    ${CURLCMD} --progress-bar -L -C - -O https://github.com/obsproject/obs-deps/releases/download/${1}/macos-deps-${1}.tar.gz
-    step "Unpack..."
-    tar -xf ./macos-deps-${1}.tar.gz -C /tmp
-}
-
-install_qt-deps() {
-    hr "Setting up pre-built dependency QT v${1}"
-    ensure_dir ${DEPS_BUILD_DIR}
-    step "Download..."
-    ${CURLCMD} --progress-bar -L -C - -O https://github.com/obsproject/obs-deps/releases/download/${2}/macos-qt-${1}-${2}.tar.gz
-    step "Unpack..."
-    tar -xf ./macos-qt-${1}-${2}.tar.gz -C /tmp
-    xattr -r -d com.apple.quarantine /tmp/obsdeps
-}
-
-install_vlc() {
-    hr "Setting up dependency VLC v${1}"
-    ensure_dir ${DEPS_BUILD_DIR}
-    step "Download..."
-    ${CURLCMD} --progress-bar -L -C - -O https://downloads.videolan.org/vlc/${1}/vlc-${1}.tar.xz
-    step "Unpack ..."
-    tar -xf vlc-${1}.tar.xz
-}
-
-install_sparkle() {
-    hr "Setting up dependency Sparkle v${1} (might prompt for password)"
-    ensure_dir ${DEPS_BUILD_DIR}/sparkle
-    step "Download..."
-    ${CURLCMD} --progress-bar -L -C - -o sparkle.tar.bz2 https://github.com/sparkle-project/Sparkle/releases/download/${1}/Sparkle-${1}.tar.bz2
-    step "Unpack..."
-    tar -xf ./sparkle.tar.bz2
-    step "Copy to destination..."
-    if [ -d /Library/Frameworks/Sparkle.framework/ ]; then
-        info "Warning - Sparkle framework already found in /Library/Frameworks"
-    else
-        sudo cp -R ./Sparkle.framework/ /Library/Frameworks/Sparkle.framework/
-    fi
-}
-
-install_cef() {
-    hr "Building dependency CEF v${1}"
-    ensure_dir ${DEPS_BUILD_DIR}
-    step "Download..."
-    ${CURLCMD} --progress-bar -L -C - -O https://obs-nightly.s3-us-west-2.amazonaws.com/cef_binary_${1}_macosx64.tar.bz2
-    step "Unpack..."
-    tar -xf ./cef_binary_${1}_macosx64.tar.bz2
-    cd ./cef_binary_${1}_macosx64
-    step "Fix tests..."
-    # remove a broken test
-    sed -i '.orig' '/add_subdirectory(tests\/ceftests)/d' ./CMakeLists.txt
-    # target 10.11
-    sed -i '.orig' s/\"10.9\"/\"10.11\"/ ./cmake/cef_variables.cmake
-    ensure_dir ./build
-    step "Run CMAKE..."
-    cmake \
-        -DCMAKE_CXX_FLAGS="-std=c++11 -stdlib=libc++"\
-        -DCMAKE_EXE_LINKER_FLAGS="-std=c++11 -stdlib=libc++"\
-        -DCMAKE_OSX_DEPLOYMENT_TARGET=10.11 \
-        ..
-    step "Build..."
-    make -j4
-    if [ ! -d libcef_dll ]; then mkdir libcef_dll; fi
-}
-
-## CHECK AND INSTALL PACKAGING DEPENDENCIES ##
-install_dmgbuild() {
-    if ! exists dmgbuild; then
-        if exists "pip3"; then
-            PIPCMD="pip3"
-        elif exists "pip"; then
-            PIPCMD="pip"
-        else
-            error "Pip not found - please install pip via 'python -m ensurepip'"
-            exit 1
-        fi
-
-        ${PIPCMD} install dmgbuild
-    fi
-}
-
 ## OBS BUILD FROM SOURCE ##
 configure_obs_build() {
     ensure_dir "${CHECKOUT_DIR}/${BUILD_DIR}"
@@ -564,7 +480,6 @@ package_macos() {
     hr "Creating macOS .dmg image"
     trap "caught_error 'package app'" ERR
 
-    install_dmgbuild
     prepare_macos_image
 }
 

@@ -3,6 +3,7 @@
 #include "window-reddit-login-dialog2.hpp"
 
 #include <QDesktopServices>
+#include <QUrlQuery>
 #include <json11.hpp>
 
 #include "api-reddit.hpp"
@@ -226,18 +227,18 @@ void RedditLoginDialog2::AuthorizeResult(const QString &text,
 	for (const QString &header : responseHeaders) {
 		if (header.left(10) == "location: ") {
 			QString val = header.mid(10);
-			int codeIdx = val.indexOf("code=");
-			if (codeIdx < 0) {
-				SetPage(PAGE_SIGNIN);
+			QUrl location(val);
+			QUrlQuery query(location);
+
+			if(!query.hasQueryItem("code")) {
+                                SetPage(PAGE_SIGNIN);
+                                serverTextResponse.reset(new QString(text));
+                                serverErrorResponse.reset(new QString(errorText));
+                                errorStep = QTStr("Reddit.ErrorLog.Step.Authorization");
 				return;
 			}
-			int codeEndIdx = val.indexOf('&', codeIdx);
-			if (codeEndIdx < 0) {
-				newCode = val.mid(codeIdx + 5);
-			} else {
-				newCode = val.mid(codeIdx + 5,
-				                  codeIdx + 5 - codeEndIdx);
-			}
+
+			newCode = query.queryItemValue("code");
 			break;
 		}
 	}
