@@ -19,10 +19,15 @@ if [[ $OS = "Linux" || $OS = "Darwin" ]] ; then
 fi
 
 # Discover clang-format
-if type clang-format-8 2> /dev/null ; then
-    CLANG_FORMAT=clang-format-8
+if type clang-format-13 2> /dev/null ; then
+    CLANG_FORMAT=clang-format-13
 else
     CLANG_FORMAT=clang-format
+    V=$(clang-format --version)
+    if [[ $V != *13.0* ]] ; then
+        echo "warning: clang-format is not 13.0 (returned ${V})"
+        #exit 1
+    fi
 fi
 
 find . -type d \( -path ./deps \
