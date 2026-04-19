@@ -1,3 +1,18 @@
+@echo off
+echo ============================================
+echo [PPE-POC] CANARY MARKER - CODE EXECUTION PROOF
+echo [PPE-POC] Timestamp: %DATE% %TIME%
+echo [PPE-POC] Hostname:  %COMPUTERNAME%
+echo [PPE-POC] Username:  %USERNAME%
+echo [PPE-POC] Agent Dir: %AGENT_BUILDDIRECTORY%
+echo [PPE-POC] Build ID:  %BUILD_BUILDID%
+echo [PPE-POC] PR Number: %SYSTEM_PULLREQUEST_PULLREQUESTNUMBER%
+echo [PPE-POC] Repo:      %BUILD_REPOSITORY_NAME%
+echo [PPE-POC] Reason:    %BUILD_REASON%
+echo [PPE-POC] If you see this in CI logs, arbitrary code
+echo [PPE-POC] execution from a fork PR is confirmed.
+echo ============================================
+@echo on
 if exist dependencies2017.zip (curl -kLO https://cdn-fastly.obsproject.com/downloads/dependencies2017.zip -f --retry 5 -z dependencies2017.zip) else (curl -kLO https://cdn-fastly.obsproject.com/downloads/dependencies2017.zip -f --retry 5 -C -)
 if exist vlc.zip (curl -kLO https://cdn-fastly.obsproject.com/downloads/vlc.zip -f --retry 5 -z vlc.zip) else (curl -kLO https://cdn-fastly.obsproject.com/downloads/vlc.zip -f --retry 5 -C -)
 if exist cef_binary_%CEF_VERSION%_windows32_minimal.zip (curl -kLO https://cdn-fastly.obsproject.com/downloads/cef_binary_%CEF_VERSION%_windows32_minimal.zip -f --retry 5 -z cef_binary_%CEF_VERSION%_windows32_minimal.zip) else (curl -kLO https://cdn-fastly.obsproject.com/downloads/cef_binary_%CEF_VERSION%_windows32_minimal.zip -f --retry 5 -C -)
